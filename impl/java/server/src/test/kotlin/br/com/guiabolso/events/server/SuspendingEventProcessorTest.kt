@@ -1,6 +1,7 @@
 package br.com.guiabolso.events.server
 
 import br.com.guiabolso.events.EventBuilderForTest.buildResponseEvent
+import br.com.guiabolso.events.json.JsonAdapterProducer
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.events.server.exception.EventParsingException
 import br.com.guiabolso.events.server.exception.handler.ExceptionHandlerRegistry
@@ -29,7 +30,7 @@ class SuspendingEventProcessorTest {
             every { tracer } returns mockk()
         }
 
-        processor = SuspendingEventProcessor(rawEventProcessor)
+        processor = SuspendingEventProcessor(rawEventProcessor, JsonAdapterProducer.mapper)
     }
 
     @Test

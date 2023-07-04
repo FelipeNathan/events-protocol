@@ -1,10 +1,11 @@
 package br.com.guiabolso.events.server.exception.handler
 
+import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.exception.EventValidationException
+import br.com.guiabolso.events.json.JsonAdapterProducer.mapper
 import br.com.guiabolso.events.model.EventErrorType.BadProtocol
 import br.com.guiabolso.events.model.EventMessage
 import br.com.guiabolso.events.model.RequestEvent
-import br.com.guiabolso.events.server.exception.handler.BadProtocolExceptionHandler.handleException
 import br.com.guiabolso.tracing.Tracer
 import io.mockk.Runs
 import io.mockk.every
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class BadProtocolExceptionHandlerTest {
+
+    val exceptionHandler = BadProtocolExceptionHandler(EventBuilder(mapper))
 
     @Test
     fun `should handle the exception and notify tracer properly`(): Unit = runBlocking {
@@ -30,10 +33,10 @@ class BadProtocolExceptionHandlerTest {
 
         every { tracer.notifyError(exception, false) } just Runs
 
-        val responseEvent = handleException(exception, requestEvent, tracer)
+        val responseEvent = exceptionHandler.handleException(exception, requestEvent, tracer)
         assertEquals(BadProtocol, responseEvent.getErrorType())
 
-        val message = responseEvent.payloadAs<EventMessage>()
+        val message = responseEvent.payloadAs<EventMessage>(mapper)
         assertEquals("INVALID_COMMUNICATION_PROTOCOL", message.code)
         assertEquals(mapOf("propertyName" to "someProperty"), message.parameters)
 

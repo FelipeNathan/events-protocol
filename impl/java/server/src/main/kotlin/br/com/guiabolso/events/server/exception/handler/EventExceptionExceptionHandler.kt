@@ -1,6 +1,6 @@
 package br.com.guiabolso.events.server.exception.handler
 
-import br.com.guiabolso.events.builder.EventBuilder.Companion.errorFor
+import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.exception.EventException
 import br.com.guiabolso.events.model.EventMessage
 import br.com.guiabolso.events.model.RequestEvent
@@ -9,7 +9,9 @@ import br.com.guiabolso.tracing.Tracer
 import br.com.guiabolso.tracing.utils.ExceptionUtils
 import datadog.trace.api.DDTags
 
-object EventExceptionExceptionHandler : EventExceptionHandler<EventException> {
+class EventExceptionExceptionHandler(
+    private val eventBuilder: EventBuilder = EventBuilder(),
+) : EventExceptionHandler<EventException> {
 
     override suspend fun handleException(
         exception: EventException,
@@ -23,6 +25,6 @@ object EventExceptionExceptionHandler : EventExceptionHandler<EventException> {
         )
         tracer.addRootProperty(DDTags.ERROR_TYPE, exception.code)
         tracer.addRootProperty(DDTags.ERROR_STACK, ExceptionUtils.getStackTrace(exception))
-        return errorFor(event, exception.type, EventMessage(exception.code, exception.parameters))
+        return eventBuilder.errorFor(event, exception.type, EventMessage(exception.code, exception.parameters))
     }
 }

@@ -1,7 +1,8 @@
 package br.com.guiabolso.events.server
 
+import br.com.guiabolso.events.json.JsonAdapter
+import br.com.guiabolso.events.json.MapperHolder
 import br.com.guiabolso.events.json.TreeNode
-import br.com.guiabolso.events.json.MapperHolder.mapper
 import br.com.guiabolso.events.json.fromJson
 import br.com.guiabolso.events.model.EventErrorType.BadProtocol
 import br.com.guiabolso.events.model.RawEvent
@@ -16,7 +17,10 @@ import br.com.guiabolso.events.validation.StrictEventValidator
 import br.com.guiabolso.tracing.Tracer
 import java.util.UUID
 
-class SuspendingEventProcessor(private val processor: RawEventProcessor) {
+class SuspendingEventProcessor(
+    private val processor: RawEventProcessor,
+    private val jsonAdapter: JsonAdapter = MapperHolder.mapper,
+) {
 
     @JvmOverloads
     constructor(
@@ -24,8 +28,12 @@ class SuspendingEventProcessor(private val processor: RawEventProcessor) {
         exceptionHandlerRegistry: ExceptionHandlerRegistry,
         tracer: Tracer = DefaultTracer,
         eventValidator: EventValidator = StrictEventValidator(),
-        traceOperationPrefix: String = ""
-    ) : this(RawEventProcessor(discovery, exceptionHandlerRegistry, tracer, eventValidator, traceOperationPrefix))
+        traceOperationPrefix: String = "",
+        jsonAdapter: JsonAdapter = MapperHolder.mapper,
+    ) : this(
+        RawEventProcessor(discovery, exceptionHandlerRegistry, tracer, eventValidator, traceOperationPrefix),
+        jsonAdapter
+    )
 
     suspend fun processEvent(payload: String?): String {
         val rawEvent = try {
@@ -38,7 +46,7 @@ class SuspendingEventProcessor(private val processor: RawEventProcessor) {
 
     private fun parseEvent(payload: String?): RawEvent {
         return try {
-            mapper.fromJson(payload!!)
+            jsonAdapter.fromJson(payload!!)
         } catch (e: Throwable) {
             throw EventParsingException(e)
         }
@@ -55,5 +63,5 @@ class SuspendingEventProcessor(private val processor: RawEventProcessor) {
         metadata = TreeNode()
     )
 
-    private fun ResponseEvent.json() = mapper.toJson(this)
+    private fun ResponseEvent.json() = jsonAdapter.toJson(this)
 }

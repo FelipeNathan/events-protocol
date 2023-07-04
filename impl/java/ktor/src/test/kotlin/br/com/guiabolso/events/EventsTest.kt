@@ -1,10 +1,9 @@
 package br.com.guiabolso.events
 
-import br.com.guiabolso.events.builder.EventBuilder.Companion.errorFor
-import br.com.guiabolso.events.builder.EventBuilder.Companion.responseFor
+import br.com.guiabolso.events.builder.EventBuilder
+import br.com.guiabolso.events.json.JsonAdapterProducer
+import br.com.guiabolso.events.json.JsonAdapterProducer.mapper
 import br.com.guiabolso.events.json.MapperHolder
-import br.com.guiabolso.events.json.MapperHolder.mapper
-import br.com.guiabolso.events.json.moshi.MoshiJsonAdapter
 import br.com.guiabolso.events.model.EventErrorType.BadRequest
 import br.com.guiabolso.events.model.EventMessage
 import br.com.guiabolso.events.model.ResponseEvent
@@ -31,7 +30,7 @@ import java.util.UUID.randomUUID
 class EventsTest : ShouldSpec({
 
     beforeSpec {
-        MapperHolder.mapper = MoshiJsonAdapter()
+        MapperHolder.mapper = JsonAdapterProducer.mapper
     }
 
     should("Have the same response for /events and /events/") {
@@ -132,22 +131,23 @@ class EventsTest : ShouldSpec({
 })
 
 fun Application.testModule() {
+    val builder = EventBuilder(mapper)
 
-    events {
+    events(mapper) {
         event("test:event", 1) {
-            responseFor(it) {
+            builder.responseFor(it) {
                 payload = mapOf("answer" to 42)
             }
         }
 
         event("test:event:encoding", 1) {
-            responseFor(it) {
+            builder.responseFor(it) {
                 payload = mapOf("answer" to it.payload)
             }
         }
 
         event("test:err:event", 1) {
-            errorFor(it, BadRequest, EventMessage("SOME_ERROR", emptyMap()))
+            builder.errorFor(it, BadRequest, EventMessage("SOME_ERROR", emptyMap()))
         }
 
         event("test:err:event:with:exception", 1) {
@@ -155,7 +155,7 @@ fun Application.testModule() {
         }
 
         exception(IllegalStateException::class) { _, evt, _ ->
-            responseFor(evt) {
+            builder.responseFor(evt) {
                 payload = mapOf("OK" to "all is fine!")
             }
         }
@@ -163,16 +163,18 @@ fun Application.testModule() {
 }
 
 fun Application.brokenTestModule() {
-    events {
+    val builder = EventBuilder(mapper)
+    events(mapper) {
         event("test:event", 1) {
-            responseFor(it) {
+            builder.responseFor(it) {
                 payload = mapOf("answer" to 42)
             }
         }
     }
-    events {
+
+    events(mapper) {
         event("another:event", 1) {
-            responseFor(it) {
+            builder.responseFor(it) {
                 payload = mapOf("answer" to 42)
             }
         }

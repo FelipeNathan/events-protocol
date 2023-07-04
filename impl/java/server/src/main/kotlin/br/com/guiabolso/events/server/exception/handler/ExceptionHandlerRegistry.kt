@@ -1,6 +1,7 @@
 package br.com.guiabolso.events.server.exception.handler
 
 import br.com.guiabolso.events.builder.EventBuilder
+import br.com.guiabolso.events.json.MapperHolder
 import br.com.guiabolso.events.model.EventErrorType
 import br.com.guiabolso.events.model.EventMessage
 import br.com.guiabolso.events.model.RequestEvent
@@ -11,7 +12,9 @@ import org.slf4j.LoggerFactory
 /**
  * To keep the same behaviour of version 5.x.x or older use [ExceptionHandlerRegistryFactory.exceptionHandler]
  */
-class ExceptionHandlerRegistry internal constructor() {
+class ExceptionHandlerRegistry internal constructor(
+    private val eventBuilder: EventBuilder = EventBuilder(MapperHolder.mapper),
+) {
 
     private val logger = LoggerFactory.getLogger(ExceptionHandlerRegistry::class.java)!!
     private val handlers = mutableMapOf<Class<*>, EventExceptionHandler<Throwable>>()
@@ -37,7 +40,7 @@ class ExceptionHandlerRegistry internal constructor() {
         } else {
             logger.error("Error processing event.", e)
             tracer.notifyError(e, false)
-            EventBuilder.errorFor(
+            eventBuilder.errorFor(
                 event,
                 EventErrorType.Generic,
                 EventMessage("UNHANDLED_ERROR", mapOf())

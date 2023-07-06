@@ -1,10 +1,13 @@
 package br.com.guiabolso.events.server
 
 import br.com.guiabolso.events.EventBuilderForTest.buildRawRequestEvent
+import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.context.EventContext
 import br.com.guiabolso.events.context.EventCoroutineContextForwarder
 import br.com.guiabolso.events.context.EventThreadContextManager
 import br.com.guiabolso.events.exception.EventValidationException
+import br.com.guiabolso.events.json.JsonAdapter
+import br.com.guiabolso.events.json.JsonAdapterProducer
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.events.model.ResponseEvent
 import br.com.guiabolso.events.server.exception.EventNotFoundException
@@ -31,14 +34,21 @@ class RawEventProcessorTest {
     private lateinit var exceptionHandlerRegistry: ExceptionHandlerRegistry
     private lateinit var eventValidator: StrictEventValidator
     private lateinit var processor: RawEventProcessor
+    private lateinit var jsonAdapter: JsonAdapter
 
     @BeforeEach
     fun setup() {
         eventHandlerRegistry = mockk()
         exceptionHandlerRegistry = mockk()
         eventValidator = mockk()
+        jsonAdapter = JsonAdapterProducer.mapper
 
-        processor = RawEventProcessor(eventHandlerRegistry, exceptionHandlerRegistry, eventValidator = eventValidator)
+        processor = RawEventProcessor(
+            eventHandlerRegistry,
+            exceptionHandlerRegistry,
+            eventValidator = eventValidator,
+            jsonAdapter = jsonAdapter
+        )
     }
 
     @Test
@@ -60,7 +70,8 @@ class RawEventProcessorTest {
         coEvery { handler.handle(request) } answers {
             assertEquals(EventContext("id", "flowId"), EventThreadContextManager.current)
             assertEquals(EventContext("id", "flowId"), EventCoroutineContextForwarder.current)
-            response
+            val func: suspend EventBuilder.() -> ResponseEvent = { response }
+            func
         }
 
         assertEquals(response, processor.processEvent(rawEvent))

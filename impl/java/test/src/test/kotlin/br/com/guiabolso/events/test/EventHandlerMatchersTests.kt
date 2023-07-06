@@ -3,8 +3,8 @@ package br.com.guiabolso.events.test
 import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.json.JsonAdapterProducer.mapper
 import br.com.guiabolso.events.model.RequestEvent
-import br.com.guiabolso.events.model.ResponseEvent
 import br.com.guiabolso.events.server.handler.ConvertingEventHandler
+import br.com.guiabolso.events.server.handler.EventResponder
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.FunSpec
 
@@ -41,7 +41,7 @@ object MyHandler : ConvertingEventHandler<String> {
         return str
     }
 
-    override suspend fun handle(input: RequestEvent, converted: String): ResponseEvent {
+    override suspend fun handle(input: RequestEvent, converted: String): EventResponder {
         throw NotImplementedError()
     }
 }

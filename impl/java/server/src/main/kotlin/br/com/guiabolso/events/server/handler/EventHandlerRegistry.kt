@@ -1,5 +1,6 @@
 package br.com.guiabolso.events.server.handler
 
+import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.events.model.ResponseEvent
 
@@ -11,5 +12,5 @@ interface EventHandlerRegistry : EventHandlerDiscovery {
 
     fun add(handler: EventHandler)
 
-    fun add(eventName: String, eventVersion: Int, handler: suspend (RequestEvent) -> ResponseEvent)
+    fun add(eventName: String, eventVersion: Int, handler: suspend EventBuilder.(RequestEvent) -> ResponseEvent)
 }

@@ -129,15 +129,15 @@ allprojects {
 
     }
 
-    signing {
-        val signingKey: String? by project
-        val signingPassword: String? by project
-
-        useGpgCmd()
-        if (signingKey != null && signingPassword != null) {
-            useInMemoryPgpKeys(signingKey, signingPassword)
-        }
-
-        sign((extensions.getByName("publishing") as PublishingExtension).publications)
-    }
+//    signing {
+//        val signingKey: String? by project
+//        val signingPassword: String? by project
+//
+//        useGpgCmd()
+//        if (signingKey != null && signingPassword != null) {
+//            useInMemoryPgpKeys(signingKey, signingPassword)
+//        }
+//
+//        sign((extensions.getByName("publishing") as PublishingExtension).publications)
+//    }
 }

@@ -1,8 +1,10 @@
 package br.com.guiabolso.events.server
 
+import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.context.EventContext
 import br.com.guiabolso.events.context.EventCoroutineContextForwarder.withCoroutineContext
 import br.com.guiabolso.events.context.EventThreadContextManager.withContext
+import br.com.guiabolso.events.json.JsonAdapter
 import br.com.guiabolso.events.json.TreeNode
 import br.com.guiabolso.events.model.EventErrorType.BadProtocol
 import br.com.guiabolso.events.model.RawEvent
@@ -25,8 +27,10 @@ constructor(
     val exceptionHandlerRegistry: ExceptionHandlerRegistry,
     val tracer: Tracer = DefaultTracer,
     val eventValidator: EventValidator = StrictEventValidator(),
-    val traceOperationPrefix: String = ""
+    val traceOperationPrefix: String = "",
+    jsonAdapter: JsonAdapter
 ) {
+    private val builder = EventBuilder(jsonAdapter)
 
     suspend fun processEvent(rawEvent: RawEvent): ResponseEvent {
         return try {
@@ -36,7 +40,8 @@ constructor(
             withContext(EventContext(event.id, event.flowId)).use {
                 withCoroutineContext {
                     startProcessingEvent(event)
-                    handler.handle(event)
+                    val eventResponder = handler.handle(event)
+                    eventResponder(builder)
                 }
             }
         } catch (e: Exception) {

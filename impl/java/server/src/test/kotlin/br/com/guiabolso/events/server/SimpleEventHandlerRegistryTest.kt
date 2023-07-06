@@ -4,8 +4,9 @@ import br.com.guiabolso.events.EventBuilderForTest
 import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.json.JsonAdapterProducer
 import br.com.guiabolso.events.model.RequestEvent
-import br.com.guiabolso.events.model.ResponseEvent
+import br.com.guiabolso.events.server.handler.ConvertingEventHandler
 import br.com.guiabolso.events.server.handler.EventHandler
+import br.com.guiabolso.events.server.handler.EventResponder
 import br.com.guiabolso.events.server.handler.SimpleEventHandlerRegistry
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,12 +18,13 @@ import org.junit.jupiter.api.Test
 class SimpleEventHandlerRegistryTest {
     private lateinit var handler1: Handler1
     private lateinit var handler2: Handler2
+    val builder = EventBuilder(JsonAdapterProducer.mapper)
 
     @BeforeEach
     fun beforeEach() {
-        val builder = EventBuilder(JsonAdapterProducer.mapper)
-        handler1 = Handler1(builder)
-        handler2 = Handler2(builder)
+
+        handler1 = Handler1()
+        handler2 = Handler2()
     }
 
     @Test
@@ -63,8 +65,8 @@ class SimpleEventHandlerRegistryTest {
 
         val handler = eventHandlerDiscovery.eventHandlerFor("event:name", 1)!!
 
-        val responseEvent = handler.handle(EventBuilderForTest.buildRequestEvent())
-        assertEquals(EventBuilderForTest.buildResponseEvent(), responseEvent)
+        val eventResponder = handler.handle(EventBuilderForTest.buildRequestEvent())
+        assertEquals(EventBuilderForTest.buildResponseEvent(), eventResponder(builder))
     }
 
     @Test
@@ -88,26 +90,29 @@ class SimpleEventHandlerRegistryTest {
     }
 }
 
-private class Handler1(private val builder: EventBuilder) : EventHandler {
+private class Handler1 : EventHandler {
     var handles = 0
 
     override val eventName = "Dummy1"
     override val eventVersion = 1
 
-    override suspend fun handle(event: RequestEvent): ResponseEvent {
+    override suspend fun handle(event: RequestEvent): EventResponder {
         handles++
-        return builder.responseFor(event) { }
+        return { responseFor(event) { } }
     }
 }
 
-private class Handler2(private val builder: EventBuilder) : EventHandler {
+private class Handler2 : ConvertingEventHandler<Unit> {
     var handles = 0
 
     override val eventName = "Dummy2"
     override val eventVersion = 1
 
-    override suspend fun handle(event: RequestEvent): ResponseEvent {
+    override fun convert(input: RequestEvent) {
+    }
+
+    override suspend fun handle(input: RequestEvent, converted: Unit): EventResponder = {
         handles++
-        return builder.responseFor(event) { }
+        responseFor(input) { }
     }
 }

@@ -31,7 +31,7 @@ class SuspendingEventProcessor(
         traceOperationPrefix: String = "",
         jsonAdapter: JsonAdapter = MapperHolder.mapper,
     ) : this(
-        RawEventProcessor(discovery, exceptionHandlerRegistry, tracer, eventValidator, traceOperationPrefix),
+        RawEventProcessor(discovery, exceptionHandlerRegistry, tracer, eventValidator, traceOperationPrefix, jsonAdapter),
         jsonAdapter
     )
 

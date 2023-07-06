@@ -62,7 +62,7 @@ class Events(configuration: TraceConfiguration) {
         }
 
         @KtorDsl
-        fun event(name: String, version: Int, handler: suspend (RequestEvent) -> ResponseEvent) {
+        fun event(name: String, version: Int, handler: suspend EventBuilder.(RequestEvent) -> ResponseEvent) {
             registry.add(name, version, handler)
         }
 

@@ -10,23 +10,23 @@ import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.events.model.ResponseEvent
 import java.util.UUID
 
-class EventBuilder(private val jsonAdapter: JsonAdapter) {
+class EventBuilder(jsonAdapter: JsonAdapter) : JsonAdapter by jsonAdapter {
 
     fun event(operations: EventTemplate.() -> Unit): RequestEvent {
-        return EventTemplate(jsonAdapter).apply(operations).toRequestEvent()
+        return EventTemplate(this).apply(operations).toRequestEvent()
     }
 
     fun responseEvent(
         operations: EventTemplate.() -> Unit,
     ): ResponseEvent {
-        return EventTemplate(jsonAdapter).apply(operations).toResponseEvent()
+        return EventTemplate(this).apply(operations).toResponseEvent()
     }
 
     suspend fun responseFor(
         event: RequestEvent,
         operations: suspend EventTemplate.() -> Unit,
     ): ResponseEvent {
-        return EventTemplate(jsonAdapter).apply {
+        return EventTemplate(this).apply {
             operations()
 
             name = "${event.name}:response"
@@ -48,7 +48,7 @@ class EventBuilder(private val jsonAdapter: JsonAdapter) {
             )
         }
 
-        return EventTemplate(jsonAdapter).apply {
+        return EventTemplate(this).apply {
             this.name = "${event.name}:${type.typeName}"
             this.version = event.version
             this.payload = message
@@ -61,7 +61,7 @@ class EventBuilder(private val jsonAdapter: JsonAdapter) {
         requestEvent: RequestEvent,
         payload: RedirectPayload,
     ): ResponseEvent {
-        return EventTemplate(jsonAdapter).apply {
+        return EventTemplate(this).apply {
             this.name = "${requestEvent.name}:redirect"
             this.version = requestEvent.version
             this.payload = payload
@@ -71,7 +71,7 @@ class EventBuilder(private val jsonAdapter: JsonAdapter) {
     }
 
     fun eventNotFound(event: RequestEvent): ResponseEvent {
-        return EventTemplate(jsonAdapter).apply {
+        return EventTemplate(this).apply {
             this.name = EventNotFound.typeName
             this.version = 1
             this.id = id ?: event.id
@@ -84,7 +84,7 @@ class EventBuilder(private val jsonAdapter: JsonAdapter) {
     }
 
     fun badProtocol(message: EventMessage): ResponseEvent {
-        return EventTemplate(jsonAdapter).apply {
+        return EventTemplate(this).apply {
             name = BadProtocol.typeName
             version = 1
             id = UUID.randomUUID().toString()

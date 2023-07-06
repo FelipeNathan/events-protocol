@@ -4,8 +4,10 @@ import br.com.guiabolso.events.EventBuilderForTest
 import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.json.JsonAdapterProducer
 import br.com.guiabolso.events.model.RequestEvent
+import br.com.guiabolso.events.server.handler.ConvertingEventHandler
 import br.com.guiabolso.events.server.handler.EventHandler
 import br.com.guiabolso.events.server.handler.EventResponder
+import br.com.guiabolso.events.server.handler.EventConverter
 import br.com.guiabolso.events.server.handler.SimpleEventHandlerRegistry
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -91,14 +93,19 @@ private object Handler1 : EventHandler {
     }
 }
 
-private object Handler2 : EventHandler {
+private object Handler2 : ConvertingEventHandler<Int> {
     var handles = 0
 
     override val eventName = "Dummy2"
     override val eventVersion = 1
 
-    override suspend fun handle(event: RequestEvent): EventResponder = {
+    override fun convert(input: RequestEvent): EventConverter<Int> = {
+        input.payloadAs(this)
+    }
+
+    override suspend fun handle(input: RequestEvent, converted: Int): EventResponder = {
         handles++
-        responseFor(event) {}
+        input.payloadAs<Int>(jsonAdapter = this)
+        responseFor(input) {}
     }
 }

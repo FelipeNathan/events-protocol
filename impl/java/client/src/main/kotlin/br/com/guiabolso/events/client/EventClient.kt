@@ -6,7 +6,6 @@ import br.com.guiabolso.events.client.exception.TimeoutException
 import br.com.guiabolso.events.client.http.FuelHttpClient
 import br.com.guiabolso.events.client.model.Response
 import br.com.guiabolso.events.json.JsonAdapter
-import br.com.guiabolso.events.json.MapperHolder
 import br.com.guiabolso.events.json.fromJson
 import br.com.guiabolso.events.model.RawEvent
 import br.com.guiabolso.events.model.RequestEvent
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory
 class EventClient
 @JvmOverloads
 constructor(
-    private val jsonAdapter: JsonAdapter = MapperHolder.mapper,
+    private val jsonAdapter: JsonAdapter,
     private val httpClient: HttpClientAdapter = FuelHttpClient(),
     private val eventValidator: EventValidator = StrictEventValidator(),
     private val defaultTimeout: Int = 60000

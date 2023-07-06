@@ -47,7 +47,7 @@ class RawEventProcessorTest {
             eventHandlerRegistry,
             exceptionHandlerRegistry,
             eventValidator = eventValidator,
-            jsonAdapter = jsonAdapter
+            eventBuilder = EventBuilder(jsonAdapter)
         )
     }
 

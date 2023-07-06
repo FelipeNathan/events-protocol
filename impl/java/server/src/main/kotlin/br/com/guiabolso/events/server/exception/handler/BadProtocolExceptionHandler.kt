@@ -8,7 +8,7 @@ import br.com.guiabolso.events.model.ResponseEvent
 import br.com.guiabolso.tracing.Tracer
 
 class BadProtocolExceptionHandler(
-    private val eventBuilder: EventBuilder = EventBuilder(),
+    private val eventBuilder: EventBuilder,
 ) : EventExceptionHandler<EventValidationException> {
 
     override suspend fun handleException(

@@ -7,7 +7,7 @@ import br.com.guiabolso.events.server.exception.EventNotFoundException
 import br.com.guiabolso.tracing.Tracer
 
 class EventNotFoundExceptionHandler(
-    private val eventBuilder: EventBuilder = EventBuilder(),
+    private val eventBuilder: EventBuilder,
 ) : EventExceptionHandler<EventNotFoundException> {
 
     override suspend fun handleException(

@@ -1,7 +1,7 @@
 package br.com.guiabolso.events.server
 
+import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.json.JsonAdapter
-import br.com.guiabolso.events.json.MapperHolder
 import br.com.guiabolso.events.json.TreeNode
 import br.com.guiabolso.events.json.fromJson
 import br.com.guiabolso.events.model.EventErrorType.BadProtocol
@@ -19,7 +19,7 @@ import java.util.UUID
 
 class SuspendingEventProcessor(
     private val processor: RawEventProcessor,
-    private val jsonAdapter: JsonAdapter = MapperHolder.mapper,
+    private val jsonAdapter: JsonAdapter,
 ) {
 
     @JvmOverloads
@@ -29,9 +29,16 @@ class SuspendingEventProcessor(
         tracer: Tracer = DefaultTracer,
         eventValidator: EventValidator = StrictEventValidator(),
         traceOperationPrefix: String = "",
-        jsonAdapter: JsonAdapter = MapperHolder.mapper,
+        jsonAdapter: JsonAdapter,
     ) : this(
-        RawEventProcessor(discovery, exceptionHandlerRegistry, tracer, eventValidator, traceOperationPrefix, jsonAdapter),
+        RawEventProcessor(
+            discovery,
+            exceptionHandlerRegistry,
+            tracer,
+            eventValidator,
+            traceOperationPrefix,
+            EventBuilder(jsonAdapter)
+        ),
         jsonAdapter
     )
 

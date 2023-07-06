@@ -2,7 +2,6 @@ package br.com.guiabolso.events
 
 import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.json.JsonAdapter
-import br.com.guiabolso.events.json.MapperHolder
 import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.events.model.ResponseEvent
 import br.com.guiabolso.events.server.SuspendingEventProcessor
@@ -54,7 +53,7 @@ class Events(configuration: TraceConfiguration) {
 
     open class Configuration(internal val jsonAdapter: JsonAdapter) {
         internal val registry = SimpleEventHandlerRegistry()
-        internal val exceptionHandler = exceptionHandler(EventBuilder((jsonAdapter)))
+        internal val exceptionHandler = exceptionHandler(EventBuilder(jsonAdapter))
 
         @KtorDsl
         fun event(handler: EventHandler) {
@@ -115,7 +114,7 @@ class Events(configuration: TraceConfiguration) {
 
 @KtorDsl
 fun Application.events(
-    jsonAdapter: JsonAdapter = MapperHolder.mapper,
+    jsonAdapter: JsonAdapter,
     tracer: Tracer = DefaultTracer,
     configuration: Events.Configuration.() -> Unit,
 ) {

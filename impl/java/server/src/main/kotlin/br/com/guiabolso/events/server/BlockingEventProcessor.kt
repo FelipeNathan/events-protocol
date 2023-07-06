@@ -1,7 +1,6 @@
 package br.com.guiabolso.events.server
 
 import br.com.guiabolso.events.json.JsonAdapter
-import br.com.guiabolso.events.json.MapperHolder
 import br.com.guiabolso.events.server.exception.handler.ExceptionHandlerRegistry
 import br.com.guiabolso.events.server.handler.EventHandlerDiscovery
 import br.com.guiabolso.events.tracer.DefaultTracer
@@ -20,7 +19,7 @@ class BlockingEventProcessor(
         tracer: Tracer = DefaultTracer,
         eventValidator: EventValidator = StrictEventValidator(),
         traceOperationPrefix: String = "",
-        jsonAdapter: JsonAdapter = MapperHolder.mapper,
+        jsonAdapter: JsonAdapter,
     ) : this(
         SuspendingEventProcessor(
             discovery,

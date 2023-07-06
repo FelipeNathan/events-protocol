@@ -8,10 +8,10 @@ import br.com.guiabolso.events.server.exception.EventNotFoundException
 object ExceptionHandlerRegistryFactory {
 
     @JvmStatic
-    fun emptyExceptionHandler(eventBuilder: EventBuilder = EventBuilder()) = ExceptionHandlerRegistry(eventBuilder)
+    fun emptyExceptionHandler(eventBuilder: EventBuilder) = ExceptionHandlerRegistry(eventBuilder)
 
     @JvmStatic
-    fun exceptionHandler(eventBuilder: EventBuilder = EventBuilder()) =
+    fun exceptionHandler(eventBuilder: EventBuilder) =
         ExceptionHandlerRegistry(eventBuilder).apply {
             register(EventValidationException::class.java, BadProtocolExceptionHandler(eventBuilder))
             register(EventNotFoundException::class.java, EventNotFoundExceptionHandler(eventBuilder))
@@ -19,7 +19,7 @@ object ExceptionHandlerRegistryFactory {
         }
 
     @JvmStatic
-    fun bypassAllExceptionHandler(eventBuilder: EventBuilder = EventBuilder(), wrapExceptionAndEvent: Boolean = true) =
+    fun bypassAllExceptionHandler(eventBuilder: EventBuilder, wrapExceptionAndEvent: Boolean = true) =
         ExceptionHandlerRegistry(eventBuilder).apply {
             register(Exception::class.java, BypassExceptionHandler(wrapExceptionAndEvent))
         }

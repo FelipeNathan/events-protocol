@@ -10,7 +10,7 @@ import br.com.guiabolso.tracing.utils.ExceptionUtils
 import datadog.trace.api.DDTags
 
 class EventExceptionExceptionHandler(
-    private val eventBuilder: EventBuilder = EventBuilder(),
+    private val eventBuilder: EventBuilder,
 ) : EventExceptionHandler<EventException> {
 
     override suspend fun handleException(

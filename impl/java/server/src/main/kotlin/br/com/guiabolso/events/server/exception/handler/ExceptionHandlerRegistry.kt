@@ -1,7 +1,6 @@
 package br.com.guiabolso.events.server.exception.handler
 
 import br.com.guiabolso.events.builder.EventBuilder
-import br.com.guiabolso.events.json.MapperHolder
 import br.com.guiabolso.events.model.EventErrorType
 import br.com.guiabolso.events.model.EventMessage
 import br.com.guiabolso.events.model.RequestEvent
@@ -13,7 +12,7 @@ import org.slf4j.LoggerFactory
  * To keep the same behaviour of version 5.x.x or older use [ExceptionHandlerRegistryFactory.exceptionHandler]
  */
 class ExceptionHandlerRegistry internal constructor(
-    private val eventBuilder: EventBuilder = EventBuilder(MapperHolder.mapper),
+    private val eventBuilder: EventBuilder,
 ) {
 
     private val logger = LoggerFactory.getLogger(ExceptionHandlerRegistry::class.java)!!

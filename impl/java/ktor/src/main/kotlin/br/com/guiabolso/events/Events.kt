@@ -8,6 +8,7 @@ import br.com.guiabolso.events.server.SuspendingEventProcessor
 import br.com.guiabolso.events.server.exception.handler.EventExceptionHandler
 import br.com.guiabolso.events.server.exception.handler.ExceptionHandlerRegistryFactory.exceptionHandler
 import br.com.guiabolso.events.server.handler.EventHandler
+import br.com.guiabolso.events.server.handler.RequestEventContext
 import br.com.guiabolso.events.server.handler.SimpleEventHandlerRegistry
 import br.com.guiabolso.events.tracer.DefaultTracer
 import br.com.guiabolso.tracing.Tracer
@@ -61,7 +62,7 @@ class Events(configuration: TraceConfiguration) {
         }
 
         @KtorDsl
-        fun event(name: String, version: Int, handler: suspend EventBuilder.(RequestEvent) -> ResponseEvent) {
+        fun event(name: String, version: Int, handler: suspend (RequestEventContext) -> ResponseEvent) {
             registry.add(name, version, handler)
         }
 

@@ -1,6 +1,5 @@
 package br.com.guiabolso.events.server
 
-import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.json.JsonAdapter
 import br.com.guiabolso.events.json.TreeNode
 import br.com.guiabolso.events.json.fromJson
@@ -37,7 +36,7 @@ class SuspendingEventProcessor(
             tracer,
             eventValidator,
             traceOperationPrefix,
-            EventBuilder(jsonAdapter)
+            jsonAdapter
         ),
         jsonAdapter
     )

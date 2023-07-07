@@ -3,9 +3,9 @@ package br.com.guiabolso.events.server
 import br.com.guiabolso.events.EventBuilderForTest
 import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.json.JsonAdapterProducer
-import br.com.guiabolso.events.model.RequestEvent
+import br.com.guiabolso.events.model.ResponseEvent
 import br.com.guiabolso.events.server.handler.EventHandler
-import br.com.guiabolso.events.server.handler.EventResponder
+import br.com.guiabolso.events.server.handler.RequestEventContext
 import br.com.guiabolso.events.server.handler.SimpleEventHandlerRegistry
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -53,9 +53,12 @@ class SimpleEventHandlerRegistryTest {
         }
 
         val handler = eventHandlerDiscovery.eventHandlerFor("event:name", 1)!!
-
-        val eventResponder = handler.handle(EventBuilderForTest.buildRequestEvent())
-        assertEquals(EventBuilderForTest.buildResponseEvent(), eventResponder(builder))
+        val eventContext = RequestEventContext(
+            event = EventBuilderForTest.buildRequestEvent(),
+            jsonAdapter = JsonAdapterProducer.mapper
+        )
+        val response = handler.handle(eventContext)
+        assertEquals(EventBuilderForTest.buildResponseEvent(), response)
     }
 
     @Test
@@ -85,9 +88,9 @@ private object Handler1 : EventHandler {
     override val eventName = "Dummy1"
     override val eventVersion = 1
 
-    override suspend fun handle(event: RequestEvent): EventResponder {
+    override suspend fun handle(event: RequestEventContext): ResponseEvent {
         handles++
-        return { responseFor(event) { } }
+        return event.response { }
     }
 }
 
@@ -97,8 +100,11 @@ private object Handler2 : EventHandler {
     override val eventName = "Dummy2"
     override val eventVersion = 1
 
-    override suspend fun handle(event: RequestEvent): EventResponder = {
+    override suspend fun handle(event: RequestEventContext): ResponseEvent {
         handles++
-        responseFor(event) {}
+        val number = event.payloadAs<Int>()
+        return event.response {
+            payload = number * number
+        }
     }
 }

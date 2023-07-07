@@ -134,20 +134,20 @@ fun Application.testModule() {
     val builder = EventBuilder(mapper)
 
     events(mapper) {
-        event("test:event", 1) {
-            builder.responseFor(it) {
+        event("test:event", 1) { event ->
+            event.response {
                 payload = mapOf("answer" to 42)
             }
         }
 
-        event("test:event:encoding", 1) {
-            builder.responseFor(it) {
-                payload = mapOf("answer" to it.payload)
+        event("test:event:encoding", 1) { request ->
+            request.response {
+                payload = mapOf("answer" to request.event.payload)
             }
         }
 
-        event("test:err:event", 1) {
-            builder.errorFor(it, BadRequest, EventMessage("SOME_ERROR", emptyMap()))
+        event("test:err:event", 1) { event ->
+            event.error(BadRequest, EventMessage("SOME_ERROR", emptyMap()))
         }
 
         event("test:err:event:with:exception", 1) {
@@ -163,18 +163,17 @@ fun Application.testModule() {
 }
 
 fun Application.brokenTestModule() {
-    val builder = EventBuilder(mapper)
     events(mapper) {
-        event("test:event", 1) {
-            builder.responseFor(it) {
+        event("test:event", 1) { event ->
+            event.response {
                 payload = mapOf("answer" to 42)
             }
         }
     }
 
     events(mapper) {
-        event("another:event", 1) {
-            builder.responseFor(it) {
+        event("another:event", 1) { event ->
+            event.response {
                 payload = mapOf("answer" to 42)
             }
         }

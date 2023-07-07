@@ -1,7 +1,5 @@
 package br.com.guiabolso.events.server.handler
 
-import br.com.guiabolso.events.builder.EventBuilder
-import br.com.guiabolso.events.model.RequestEvent
 import br.com.guiabolso.events.model.ResponseEvent
 import org.slf4j.LoggerFactory
 
@@ -22,7 +20,7 @@ class SimpleEventHandlerRegistry : EventHandlerRegistry {
     override fun add(
         eventName: String,
         eventVersion: Int,
-        handler: suspend EventBuilder.(RequestEvent) -> ResponseEvent
+        handler: suspend (RequestEventContext) -> ResponseEvent
     ) {
         add(LambdaEventHandler(eventName, eventVersion, handler))
     }

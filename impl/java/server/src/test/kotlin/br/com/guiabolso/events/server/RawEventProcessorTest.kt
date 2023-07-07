@@ -1,7 +1,6 @@
 package br.com.guiabolso.events.server
 
 import br.com.guiabolso.events.EventBuilderForTest.buildRawRequestEvent
-import br.com.guiabolso.events.builder.EventBuilder
 import br.com.guiabolso.events.context.EventContext
 import br.com.guiabolso.events.context.EventCoroutineContextForwarder
 import br.com.guiabolso.events.context.EventThreadContextManager
@@ -13,6 +12,7 @@ import br.com.guiabolso.events.model.ResponseEvent
 import br.com.guiabolso.events.server.exception.EventNotFoundException
 import br.com.guiabolso.events.server.exception.handler.ExceptionHandlerRegistry
 import br.com.guiabolso.events.server.handler.EventHandler
+import br.com.guiabolso.events.server.handler.RequestEventContext
 import br.com.guiabolso.events.server.handler.SimpleEventHandlerRegistry
 import br.com.guiabolso.events.tracer.DefaultTracer
 import br.com.guiabolso.events.validation.StrictEventValidator
@@ -47,7 +47,7 @@ class RawEventProcessorTest {
             eventHandlerRegistry,
             exceptionHandlerRegistry,
             eventValidator = eventValidator,
-            eventBuilder = EventBuilder(jsonAdapter)
+            jsonAdapter = jsonAdapter
         )
     }
 
@@ -64,21 +64,21 @@ class RawEventProcessorTest {
         }
         val response = mockk<ResponseEvent>()
         val handler = mockk<EventHandler>()
+        val eventContext = RequestEventContext(request, jsonAdapter)
 
         every { eventValidator.validateAsRequestEvent(rawEvent) } returns request
         every { eventHandlerRegistry.eventHandlerFor("eventName", 1) } returns handler
-        coEvery { handler.handle(request) } answers {
+        coEvery { handler.handle(eventContext) } answers {
             assertEquals(EventContext("id", "flowId"), EventThreadContextManager.current)
             assertEquals(EventContext("id", "flowId"), EventCoroutineContextForwarder.current)
-            val func: suspend EventBuilder.() -> ResponseEvent = { response }
-            func
+            response
         }
 
         assertEquals(response, processor.processEvent(rawEvent))
 
         verify(exactly = 1) { eventValidator.validateAsRequestEvent(rawEvent) }
         verify(exactly = 1) { eventHandlerRegistry.eventHandlerFor("eventName", 1) }
-        coVerify(exactly = 1) { handler.handle(request) }
+        coVerify(exactly = 1) { handler.handle(eventContext) }
     }
 
     @Test
